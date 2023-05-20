@@ -20,6 +20,7 @@ list(APPEND CMAKE_CUDA_FLAGS "-keep")
 add_library(${PROJECT_NAME} SHARED src/ptxdump.cpp src/ptxdump_preload.cpp
 	ThirdParty/cuda-fatbin-decompression/fatbin-decompress.c)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/cuda-fatbin-decompression)
 

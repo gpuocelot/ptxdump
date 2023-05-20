@@ -15,7 +15,7 @@ make
 
 ## Testing
 
-The `ptxdump_example` sample CUDA binary has been compiled with CUDA 7.5. The following command dumps the corresponding sample PTX as shown below:
+The `ptxdump_example` sample CUDA binary has been compiled with CUDA 11.7. The following command dumps the corresponding sample PTX as shown below:
 
 ```
 LD_PRELOAD=./libptxdump.so ./ptxdump_example

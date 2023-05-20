@@ -4,6 +4,8 @@
 #define __cudaFatMAGIC     0x1ee55a01
 #define __cudaFatMAGIC2    0x466243b1
 
+#define __cudaCubinMAGIC   0xba55ed50
+
 #define COMPRESSED_PTX     0x0000000000001000LL
 
 enum FatBin2EntryType {

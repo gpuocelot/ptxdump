@@ -29,10 +29,36 @@ public :
 	}
 };
 
-void ptxdump(const void *fatCubin)
+static void ptxdump_elf_header(fat_elf_header* header)
 {
 	static SeenPtx seenPtx;
+	
+	char* base = (char*)(header + 1);
+	auto entry = (fat_text_header*)(base);
+	for (long long unsigned int offset = 0; offset < header->header_size;
+		entry = (fat_text_header*)(base + offset), offset += entry->header_size + entry->size) 
+	{
+		if (!(entry->kind & FATBIN_2_PTX))
+			continue;
 
+		std::vector<uint8_t> result(entry->decompressed_size);
+		auto size_fact = decompress((uint8_t*)entry + entry->header_size, entry->compressed_size,
+			result.data(), result.size());
+
+		if (size_fact != entry->decompressed_size)
+		{
+			fprintf(stderr, "Decompressed PTX size does not match the entry info: %zu != %zu\n",
+				(size_t)size_fact, (size_t)entry->decompressed_size);
+		}
+
+		printf("%s\n", reinterpret_cast<const char*>(result.data()));
+
+		seenPtx.seen = true;
+	}
+}
+
+void ptxdump(const void *fatCubin)
+{
 	assert(fatCubin != 0);
 
 	if(*(int*)fatCubin == __cudaFatMAGIC) 
@@ -46,7 +72,7 @@ void ptxdump(const void *fatCubin)
 		std::cout << binary->ident << std::endl;
 		assert(binary->ptx != 0);
 		assert(binary->ptx->ptx != 0);
-	  
+
 		int i = 0;
 		while(binary->ptx[i].ptx != 0)
 		{
@@ -60,30 +86,25 @@ void ptxdump(const void *fatCubin)
 	else if(*(unsigned*)fatCubin == __cudaFatMAGIC2)
 	{
 		auto binary = (__cudaFatCudaBinary2*) fatCubin;
+
 		auto header = (fat_elf_header*) binary->fatbinData;
-
-		char* base = (char*)(header + 1);
-		auto entry = (fat_text_header*)(base);
-		for (long long unsigned int offset = 0; offset < header->header_size;
-			entry = (fat_text_header*)(base + offset), offset += entry->header_size + entry->size) 
+		if (header->magic != __cudaCubinMAGIC)
 		{
-			if (!(entry->kind & FATBIN_2_PTX))
-				continue;
-
-			std::vector<uint8_t> result(entry->decompressed_size);
-			auto size_fact = decompress((uint8_t*)entry + entry->header_size, entry->compressed_size,
-				result.data(), result.size());
-
-			if (size_fact != entry->decompressed_size)
-			{
-				fprintf(stderr, "Decompressed PTX size does not match the header info: %zu != %zu\n",
-					(size_t)size_fact, (size_t)entry->decompressed_size);
-			}
-
-			printf("%s\n", reinterpret_cast<const char*>(result.data()));
-
-			seenPtx.seen = true;
+			fprintf(stderr, "CUBIN magic does not match the header info: 0x%x != 0x%x\n",
+				header->magic, __cudaCubinMAGIC);
+			assert(header->magic == __cudaCubinMAGIC);
+			return;
 		}
+
+		if ((binary->version == 2) && binary->f)
+		{
+			// Separable compilation is enabled: fatbins are in the other field.
+			auto prelinkedFatbins = (fat_elf_header**)binary->f;
+			for (int i = 0; prelinkedFatbins[i] != nullptr; i++)
+				ptxdump_elf_header(prelinkedFatbins[i]);
+		}
+		else
+			ptxdump_elf_header(header);
 	}
 	else
 	{
