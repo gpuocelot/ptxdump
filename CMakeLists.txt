@@ -9,6 +9,10 @@ set(CMAKE_CUDA_ARCHITECTURES 35-virtual)
 # CUDA runtime must be shared, so that we could intercept it.
 set(CMAKE_CUDA_RUNTIME_LIBRARY Shared)
 
+# Separable compilation may add extra fatbin images, so we
+# enable it to test this case.
+set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+
 # Keep intermediate files produced during example compilation:
 # we will use them for testing
 list(APPEND CMAKE_CUDA_FLAGS "-keep")

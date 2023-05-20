@@ -11,8 +11,28 @@ extern "C" {
 #include "fatbin-decompress.h"
 } // extern "C"
 
+// This guard is here to display a warning, if no PTX code
+// has been found in all visited fatbin images.
+class SeenPtx
+{
+public :
+
+	bool seen = false;
+
+	~SeenPtx()
+	{
+		if (!seen)
+		{
+			fprintf(stderr, "PTX entry is is not found in CUBIN, remember to include virtual architecture into NVCC compiler options\n");
+			assert(seen);
+		}
+	}
+};
+
 void ptxdump(const void *fatCubin)
 {
+	static SeenPtx seenPtx;
+
 	assert(fatCubin != 0);
 
 	if(*(int*)fatCubin == __cudaFatMAGIC) 
@@ -42,7 +62,6 @@ void ptxdump(const void *fatCubin)
 		auto binary = (__cudaFatCudaBinary2*) fatCubin;
 		auto header = (fat_elf_header*) binary->fatbinData;
 
-		bool seen_ptx = false;
 		char* base = (char*)(header + 1);
 		auto entry = (fat_text_header*)(base);
 		for (long long unsigned int offset = 0; offset < header->header_size;
@@ -63,14 +82,7 @@ void ptxdump(const void *fatCubin)
 
 			printf("%s\n", reinterpret_cast<const char*>(result.data()));
 
-			seen_ptx = true;
-		}
-
-		if (!seen_ptx)
-		{
-			fprintf(stderr, "PTX entry is is not found in CUBIN, remember to include virtual architecture into NVCC compiler options\n");
-			assert(seen_ptx);
-			return;
+			seenPtx.seen = true;
 		}
 	}
 	else
