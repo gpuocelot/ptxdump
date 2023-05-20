@@ -41,9 +41,18 @@ static void ptxdump_elf_header(fat_elf_header* header)
 		if (!(entry->kind & FATBIN_2_PTX))
 			continue;
 
-		std::vector<uint8_t> result(entry->decompressed_size);
+		seenPtx.seen = true;
+
+		if (!(entry->flags & COMPRESSED_PTX))
+		{
+			auto ptx = (char*)entry + entry->header_size;
+			printf("%s\n", reinterpret_cast<const char*>(&ptx[0]));
+			continue;
+		}
+
+		std::vector<uint8_t> ptx(entry->decompressed_size);
 		auto size_fact = decompress((uint8_t*)entry + entry->header_size, entry->compressed_size,
-			result.data(), result.size());
+			ptx.data(), ptx.size());
 
 		if (size_fact != entry->decompressed_size)
 		{
@@ -51,9 +60,7 @@ static void ptxdump_elf_header(fat_elf_header* header)
 				(size_t)size_fact, (size_t)entry->decompressed_size);
 		}
 
-		printf("%s\n", reinterpret_cast<const char*>(result.data()));
-
-		seenPtx.seen = true;
+		printf("%s\n", reinterpret_cast<const char*>(&ptx[0]));
 	}
 }
 

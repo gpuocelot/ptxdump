@@ -6,7 +6,7 @@
 
 #define __cudaCubinMAGIC   0xba55ed50
 
-#define COMPRESSED_PTX     0x0000000000001000LL
+#define COMPRESSED_PTX     0x0000000000002000LL
 
 enum FatBin2EntryType {
 	FATBIN_2_PTX = 0x1
