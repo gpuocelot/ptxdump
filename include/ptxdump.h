@@ -1,13 +1,9 @@
-#ifndef _PTX_FROM_FATBIN_HPP
-#define _PTX_FROM_FATBIN_HPP
-
-//UNUSED
-#define __cudaFatVERSION   0x00000004
-#define __cudaFatMAGIC3    0xba55ed50
+#ifndef PTXDUMP_H
+#define PTXDUMP_H
 
 #define __cudaFatMAGIC     0x1ee55a01
-
 #define __cudaFatMAGIC2    0x466243b1
+
 #define COMPRESSED_PTX     0x0000000000001000LL
 
 enum FatBin2EntryType {
@@ -61,27 +57,6 @@ typedef struct __cudaFatCudaBinaryRec {
     __cudaFatElfEntry *elf;
 } __cudaFatCudaBinary;
 
-typedef struct __cudaFatCudaBinary2EntryRec { 
-    unsigned int           type;
-    unsigned int           binary;
-    unsigned long long int binarySize;
-    unsigned int           unknown2;
-    unsigned int           kindOffset;
-    unsigned int           unknown3;
-    unsigned int           unknown4;
-    unsigned int           name;
-    unsigned int           nameSize;
-    unsigned long long int flags;
-    unsigned long long int unknown7;
-    unsigned long long int uncompressedBinarySize;
-} __cudaFatCudaBinary2Entry;
-
-typedef struct __cudaFatCudaBinary2HeaderRec { 
-    unsigned int            magic;
-    unsigned int            version;
-    unsigned long long int  length;
-} __cudaFatCudaBinary2Header;
-
 typedef struct __cudaFatCudaBinaryRec2 {
     int magic;
     int version;
@@ -89,6 +64,7 @@ typedef struct __cudaFatCudaBinaryRec2 {
     char* f;
 } __cudaFatCudaBinary2;
 
-void ptx_from_fatbin(const void *cubin_ptr);
+void ptxdump(const void *fatCubin);
 
-#endif
+#endif // PTXDUMP_H
+

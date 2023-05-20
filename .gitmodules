@@ -1,0 +1,3 @@
+[submodule "ThirdParty/cuda-fatbin-decompression"]
+	path = ThirdParty/cuda-fatbin-decompression
+	url = https://github.com/gpuocelot/cuda-fatbin-decompression.git
